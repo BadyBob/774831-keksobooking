@@ -12,12 +12,6 @@ var TITLE = [
   'Уютное бунгало далеко от моря',
   'Неуютное бунгало по колено в воде'
 ];
-// var TYPE = [
-//   'palace',
-//   'flat',
-//   'house',
-//   'bungalo'
-// ];
 var AccomodationType = {
   PALACE: 'Дворец',
   FLAT: 'Квартира',
@@ -104,7 +98,7 @@ var getRandomProperty = function (obj) {
 var generateObject = function () {
   var x = getRandomInt(MIN_X, MAX_X);
   var y = getRandomInt(MIN_Y, MAX_Y);
-  return {
+  var pinObj = {
     'author': {
       'avatar': 'img/avatars/user01.png'
     },
@@ -126,30 +120,43 @@ var generateObject = function () {
       'y': y
     }
   };
+  return pinObj;
 };
+
 /**
 * Возращает массив объектов.
-* @param {number} count - количество объявлений
+* @param {number} countAdverts - количество объявлений
 * @return {Object[]} массив объявлений
 */
-var generateArrayOfAdverts = function (count) {
+var generateArrayOfAdverts = function (countAdverts) {
   var advertsArray = [];
-  for (var i = 0; i < count; i++) {
+  for (var i = 1; i <= countAdverts; i++) {
     advertsArray.push(generateObject());
   }
   return advertsArray;
 };
 generateArrayOfAdverts(COUNT_ADVERTS);
 var map = document.querySelector('.map');
-var mapPins = document.querySelector('.map__pins');
+var mapPins = map.querySelector('.map__pins');
 map.classList.remove('map--faded');
-var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
-var pinElement = pinTemplate.cloneNode(true);
-pinElement.querySelector('img').src =
 
-mapPins.appendChild(pinElement);
-// var drawPin = function (pin) {
-//   var pinElement = pinTemplate.cloneNode(true);
-//   var image = pinElement.querySelector('img');
-//   pinElement.style = 'left: ' + pin.location.x + 'px; top: ' + pin.location.y
-// }
+var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
+
+var renderPin = function (pin) {
+  var pinElement = pinTemplate.cloneNode(true);
+  pinElement.querySelector('img').src = 'img/avatars/user0' + i + '.png';
+  pinElement.querySelector('img').alt = pin.offer.title;
+  pinElement.style = 'left: ' + pin.location.x + 'px; top: ' + pin.location.y + 'px;';
+  return pinElement;
+};
+
+var renderPinsOnMap = function () {
+  var fragment = document.createDocumentFragment();
+  for (var i = 1; i <= COUNT_ADVERTS; i++) {
+    fragment.appendChild(renderPin(generateObject()));
+  }
+
+  mapPins.appendChild(fragment);
+};
+
+renderPinsOnMap();
