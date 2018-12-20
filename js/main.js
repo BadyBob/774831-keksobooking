@@ -141,7 +141,11 @@ var mapPins = map.querySelector('.map__pins');
 map.classList.remove('map--faded');
 
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
-
+/**
+* Клонирует шаблон, заполняет данными и возврощает.
+* @param {Object} pin - анные из объекта
+* @return {DOMNode} pinElement - метка объявления
+*/
 var renderPin = function (pin) {
   var pinElement = pinTemplate.cloneNode(true);
   pinElement.querySelector('img').src = 'img/avatars/user0' + i + '.png';
@@ -149,14 +153,14 @@ var renderPin = function (pin) {
   pinElement.style = 'left: ' + pin.location.x + 'px; top: ' + pin.location.y + 'px;';
   return pinElement;
 };
-
+/**
+* Добавляет на карту метки
+*/
 var renderPinsOnMap = function () {
   var fragment = document.createDocumentFragment();
   for (var i = 1; i <= COUNT_ADVERTS; i++) {
     fragment.appendChild(renderPin(generateObject()));
   }
-
   mapPins.appendChild(fragment);
 };
-
 renderPinsOnMap();
