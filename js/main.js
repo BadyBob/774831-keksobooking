@@ -190,7 +190,6 @@ var generateArrayOfAdverts = function (countAdverts) {
 
 var map = document.querySelector('.map');
 var mapPins = map.querySelector('.map__pins');
-map.classList.remove('map--faded');
 
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 /**
@@ -219,9 +218,15 @@ var renderPinsOnMap = function (pins) {
   mapPins.appendChild(fragment);
 };
 var pinsData = generateArrayOfAdverts(COUNT_ADVERTS);
-renderPinsOnMap(pinsData);
 
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
+
+var popupCloseKeydownHandler = function (evt) {
+  if (evt.keyCode === 27) {
+    map.removeChild(map.querySelector('.map__card'));
+  }
+  document.removeEventListener('keydown', popupCloseKeydownHandler);
+};
 /**
  * Клонирует шаблон, заполняет данными и возврощает.
  * @param {Object} card - данные из объекта
@@ -231,6 +236,8 @@ var renderCard = function (card) {
   var cardElement = cardTemplate.cloneNode(true);
   var fragmentPhotos = document.createDocumentFragment();
   var fragmentFeatures = document.createDocumentFragment();
+  var popupClose = cardElement.querySelector('.popup__close');
+
   cardElement.querySelector('.popup__title').textContent = card.offer.title;
   cardElement.querySelector('.popup__text--address').textContent = card.offer.address;
   cardElement.querySelector('.popup__text--price').textContent = card.offer.price + '₽/ночь';
@@ -263,6 +270,12 @@ var renderCard = function (card) {
   cardElement.querySelector('.popup__description').textContent = card.offer.discription;
   cardElement.querySelector('.popup__avatar').src = card.author.avatar;
 
+  popupClose.addEventListener('click', function () {
+    map.removeChild(cardElement);
+  });
+
+  document.addEventListener('keydown', popupCloseKeydownHandler);
+
   return cardElement;
 };
 /**
@@ -271,6 +284,79 @@ var renderCard = function (card) {
  */
 var renderCardOnMap = function (indexPinsData) {
   var card = renderCard(pinsData[indexPinsData]);
+  var openedCard = map.querySelector('.map__card');
+  if (openedCard) {
+    map.removeChild(openedCard);
+  }
   document.querySelector('.map__filters-container').insertAdjacentElement('beforebegin', card);
 };
-renderCardOnMap(0);
+
+var mainPin = document.querySelector('.map__pin--main');
+
+var disableFields = function () {
+  var advertForm = document.querySelector('.ad-form');
+  var fieldsetsAdvertForm = advertForm.querySelectorAll('fieldset');
+  var advertFilter = document.querySelector('.map__filters');
+  var fieldsetAdvertFilter = advertFilter.querySelector('fieldset');
+  var selectAdvertFilter = advertFilter.querySelectorAll('select');
+
+  fieldsetAdvertFilter.disabled = true;
+
+  fieldsetsAdvertForm.forEach(function (fieldset) {
+    fieldset.disabled = true;
+  });
+  selectAdvertFilter.forEach(function (select) {
+    select.disabled = true;
+  });
+};
+disableFields();
+
+var enableFields = function () {
+  var advertForm = document.querySelector('.ad-form');
+  var fieldsetsAdvertForm = advertForm.querySelectorAll('fieldset');
+  var advertFilter = document.querySelector('.map__filters');
+  var fieldsetAdvertFilter = advertFilter.querySelector('fieldset');
+  var selectAdvertFilter = advertFilter.querySelectorAll('select');
+  var advertFormAddress = advertForm.querySelector('#address');
+  var mainPinSize = {
+    WIDTH: 65,
+    HEIGHT: 65
+  };
+
+  advertFormAddress.value = (mainPin.offsetLeft + mainPinSize.WIDTH / 2) + ', '
+   + (mainPin.offsetTop + mainPinSize.HEIGHT + 15);
+
+  advertForm.classList.remove('ad-form--disabled');
+
+  fieldsetAdvertFilter.disabled = false;
+
+  fieldsetsAdvertForm.forEach(function (fieldset) {
+    fieldset.disabled = false;
+  });
+
+  selectAdvertFilter.forEach(function (select) {
+    select.disabled = false;
+  });
+};
+
+var buttonMouseupHandler = function () {
+  map.classList.remove('map--faded');
+
+  enableFields();
+  renderPinsOnMap(pinsData);
+
+  var pins = map.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+  pins.forEach(function (pin) {
+    pin.addEventListener('click', function () {
+      renderCardOnMap(0);
+    });
+
+  });
+
+
+  mainPin.removeEventListener('mouseup', buttonMouseupHandler);
+};
+
+mainPin.addEventListener('mouseup', buttonMouseupHandler);
+
